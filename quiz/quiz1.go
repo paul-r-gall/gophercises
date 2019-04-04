@@ -40,32 +40,32 @@ func main() {
 	fmt.Println("Hit Enter to start the quiz")
 	fmt.Scanln()
 	go func() {
-		time.Sleep(30*time.Second)
+		time.Sleep(5*time.Second)
 		tChannel <- true
 	}()
-	Loop:
-		for {
-			line, err := reader.Read()
-			if err == io.EOF {
-				break
-			} else if err != nil {
-				log.Fatal(err)
-			}
-			total += 1
-			fmt.Println(parseQuest(line[0]))
-			go awaitAns(ansChannel)
-			select {
-			case ans := <-ansChannel:
-				if ans == parseAns(line[1]) {
-					fmt.Println("Correct!")
-					correct+=1
-				} else {
-					fmt.Println("Incorrect.")
-				}
-			case <-tChannel:
-				break Loop
-			}	
+
+	timeout := false
+	for !timeout {
+		line, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
 		}
+		total += 1
+		fmt.Println(parseQuest(line[0]))
+		go awaitAns(ansChannel)
+		select {
+		case ans := <-ansChannel:
+			if ans == parseAns(line[1]) {
+				fmt.Println("Correct!")
+				correct+=1
+			} else {
+				fmt.Println("Incorrect.")
+			}
+		case timeout = <-tChannel:
+		}	
+	}
 
 	for {
 		line, err := reader.Read()
