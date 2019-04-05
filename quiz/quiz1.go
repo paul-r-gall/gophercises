@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"flag"
 )
 
 func parseQuest(q string) string {
@@ -32,19 +33,23 @@ func awaitAns(ansCha chan string) {
 func main() {
 	tChannel := make(chan bool, 1)
 	ansChannel := make(chan string, 1)
-	csvFile, _ := os.Open("problems.csv")
+	filePtr := flag.String("file","problems.csv","quiz file (csv format)")
+	flag.Parse()
+	
+	csvFile, _ := os.Open(*filePtr)
 	reader := csv.NewReader(bufio.NewReader(csvFile))
 	
 	correct := 0
 	total := 0
+	timeout := false
 	fmt.Println("Hit Enter to start the quiz")
 	fmt.Scanln()
+	// start the timer
 	go func() {
 		time.Sleep(5*time.Second)
 		tChannel <- true
 	}()
-
-	timeout := false
+	// run the quiz
 	for !timeout {
 		line, err := reader.Read()
 		if err == io.EOF {
@@ -66,7 +71,7 @@ func main() {
 		case timeout = <-tChannel:
 		}	
 	}
-
+	// print out unanswered questions
 	for {
 		line, err := reader.Read()
 		if err == io.EOF {
