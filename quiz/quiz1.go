@@ -46,7 +46,7 @@ func main() {
 	fmt.Scanln()
 	// start the timer
 	go func() {
-		time.Sleep(5*time.Second)
+		time.Sleep(10*time.Second)
 		tChannel <- true
 	}()
 	// run the quiz
