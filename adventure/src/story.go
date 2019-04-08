@@ -2,7 +2,7 @@ package story
 
 import (
 	"encoding/json"
-	//"fmt"
+	"fmt"
 	"io/ioutil"
 	"log"
 )
@@ -26,6 +26,7 @@ func ParseJSONtoStory(jsonFile string) (map[string]Arc, error) {
 	}
 	fs := make(map[string]Arc)
 	err = json.Unmarshal(jsonText, &fs)
+	
 	return fs,err
 }
 
