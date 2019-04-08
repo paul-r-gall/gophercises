@@ -28,6 +28,7 @@ func parseNode(n *html.Node, b *bytes.Buffer, top *html.Node) {
 	if n == top {
 		return
 	}
+	parseNode(n.NextSibling, b, top)
 }
 
 func checkFatal(err error) {
@@ -40,19 +41,28 @@ func isLink(n *html.Node) bool {
 	return n.Type == html.ElementNode && n.Data == "a"
 }
 
-func nodeDFS(root *html.Node, aList []*html.Node) {
+func nodeDFS(root *html.Node, linkList *[]Link) {
 	if root == nil {
 		return
 	}
 	if isLink(root) {
-		aList = append(aList, root)
-	} else {
-		nodeDFS(root.FirstChild, aList)
-	}
+		var href string
+		for _, att := range root.Attr {
+			if att.Key == "href" {
+				href = att.Val
+			}
+		}
+		textBuffer := new(bytes.Buffer)
+		parseNode(root, textBuffer, root)
+		*linkList = append(*linkList, Link{
+			Href:    href,
+			Content: textBuffer.String(),
+		})
 
-	if root.NextSibling != nil {
-		nodeDFS(root.NextSibling, aList)
+	} else {
+		nodeDFS(root.FirstChild, linkList)
 	}
+	nodeDFS(root.NextSibling, linkList)
 	return
 }
 
@@ -73,23 +83,8 @@ func FindLinks(siteURL string) []Link {
 	doc, err := html.Parse(strings.NewReader(string(src)))
 	checkFatal(err)
 
-	var aList []*html.Node
-	nodeDFS(doc, aList)
-
 	var linkArr []Link
+	nodeDFS(doc, &linkArr)
 
-	for _, link := range aList {
-		lBuf := new(bytes.Buffer)
-		parseNode(link, lBuf, link)
-		var href string
-		for _, att := range link.Attr {
-			if att.Key == "href" {
-				href = att.Val
-			}
-		}
-		linkArr = append(linkArr, Link{
-			Href:    href,
-			Content: lBuf.String()})
-	}
 	return linkArr
 }
