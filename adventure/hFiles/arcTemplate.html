@@ -1,0 +1,12 @@
+<div class="page-title">{{.Title}}</div>
+<div class="story">
+    {{range .Story}}
+        {{.}}
+    {{end}}
+</div>
+<div class="options">
+    {{range .Options}}
+        <a href="/{{.ArcLabel}}">{{.Text}}</a>
+        <br>
+    {{end}}
+</div>

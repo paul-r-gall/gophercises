@@ -21,7 +21,8 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
-	// retrieve the yaml data from the file given by the flag. 
+	// retrieve the yaml data from the file given by the flag.
+	// if there is no flag file, or 
 	var yaml []byte
 	flag.Parse()
 	file := *filePtr
@@ -36,7 +37,14 @@ func main() {
 		var err error
 		yaml, err = ioutil.ReadFile(file)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			fmt.Println("File Read Invalid -- Using default YAML")
+			yaml = []byte(`
+- path: /urlshort
+  url: https://github.com/gophercises/urlshort
+- path: /urlshort-final
+  url: https://github.com/gophercises/urlshort/tree/solution
+`)
 		}
 	}
 
