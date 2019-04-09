@@ -24,7 +24,7 @@ func cleanWhitespace(s string) string {
 }
 
 func parseNode(n *html.Node, b *bytes.Buffer, top *html.Node) {
-	if n == nil {
+	if n == nil || n.Type == html.CommentNode {
 		return
 	}
 	if n.Type == html.TextNode {
@@ -78,6 +78,7 @@ func FindLinks(siteURL string) []Link {
 	resp, err := http.Get(siteURL)
 	for err != nil {
 		fmt.Println("Enter a valid URL")
+		fmt.Println(err == nil)
 		fmt.Scanln(&siteURL)
 		resp, err = http.Get(siteURL)
 	}
