@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"golang.org/x/net/html"
@@ -15,6 +16,11 @@ import (
 type Link struct {
 	Href    string
 	Content string
+}
+
+func cleanWhitespace(s string) string {
+	space := regexp.MustCompile(`\s+`)
+	return space.ReplaceAllString(s, " ")
 }
 
 func parseNode(n *html.Node, b *bytes.Buffer, top *html.Node) {
@@ -56,7 +62,7 @@ func nodeDFS(root *html.Node, linkList *[]Link) {
 		parseNode(root, textBuffer, root)
 		*linkList = append(*linkList, Link{
 			Href:    href,
-			Content: textBuffer.String(),
+			Content: cleanWhitespace(textBuffer.String()),
 		})
 
 	} else {
@@ -68,6 +74,7 @@ func nodeDFS(root *html.Node, linkList *[]Link) {
 
 // FindLinks converts a siteURL to a list of all its contained hyperlinks.
 func FindLinks(siteURL string) []Link {
+
 	resp, err := http.Get(siteURL)
 	for err != nil {
 		fmt.Println("Enter a valid URL")
