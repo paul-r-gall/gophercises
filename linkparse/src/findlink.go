@@ -2,7 +2,6 @@ package findlink
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +19,7 @@ type Link struct {
 
 func cleanWhitespace(s string) string {
 	space := regexp.MustCompile(`\s+`)
-	return space.ReplaceAllString(s, " ")
+	return strings.TrimSpace(space.ReplaceAllString(s, " "))
 }
 
 func parseNode(n *html.Node, b *bytes.Buffer, top *html.Node) {
@@ -61,7 +60,7 @@ func nodeDFS(root *html.Node, linkList *[]Link) {
 		textBuffer := new(bytes.Buffer)
 		parseNode(root, textBuffer, root)
 		*linkList = append(*linkList, Link{
-			Href:    href,
+			Href:    strings.TrimSpace(href),
 			Content: cleanWhitespace(textBuffer.String()),
 		})
 
@@ -77,10 +76,7 @@ func FindLinks(siteURL string) []Link {
 
 	resp, err := http.Get(siteURL)
 	for err != nil {
-		fmt.Println("Enter a valid URL")
-		fmt.Println(err == nil)
-		fmt.Scanln(&siteURL)
-		resp, err = http.Get(siteURL)
+		return *new([]Link)
 	}
 
 	defer resp.Body.Close()
