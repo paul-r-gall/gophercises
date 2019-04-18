@@ -16,6 +16,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -32,6 +33,9 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("add called")
+		taskName := strings.Join(args, " ")
+		fmt.Println(taskName)
+		fmt.Println(label)
 	},
 }
 
@@ -39,7 +43,7 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	// Here you will define your flags and configuration settings.
-
+	addCmd.Flags().StringVarP(&label, "label", "l", "", "the label of the task to add")
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// addCmd.PersistentFlags().String("foo", "", "A help for foo")

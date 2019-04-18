@@ -30,8 +30,10 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
+		fmt.Println(label)
 	},
 }
 
@@ -39,7 +41,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.
-
+	listCmd.Flags().StringVarP(&label, "label", "l", "", "list all tasks with this label")
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// listCmd.PersistentFlags().String("foo", "", "A help for foo")

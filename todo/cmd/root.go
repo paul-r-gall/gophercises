@@ -18,21 +18,27 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/boltdb/bolt"
+
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
+// declare Flags
 var cfgFile string
+var label string
+
+const dbFile = "tasks.db"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "todo",
 	Short: "A CLI todo list backed bo BoltDB",
-	Long: `A CLI todo list backed by BoltDB`,
+	Long:  `A CLI todo list backed by BoltDB`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	// Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -55,6 +61,21 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
+	db, _ := bolt.Open(dbFile, 0600, nil)
+	defer db.Close()
+	db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("unlabeled"))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		_, err = tx.CreateBucketIfNotExists([]byte("imp"))
+		if err != nil {
+			return fmt.Errorf("create bucket: %s", err)
+		}
+		return nil
+	})
+
 }
 
 // initConfig reads in config file and ENV variables if set.
