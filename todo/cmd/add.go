@@ -18,24 +18,46 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/boltdb/bolt"
+
 	"github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "add a task",
+	Long:  `Add a task to the database.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		if label == "imp" {
+			fmt.Println("Invalid Label")
+			return
+		}
 		taskName := strings.Join(args, " ")
-		fmt.Println(taskName)
-		fmt.Println(label)
+
+		db, err := bolt.Open(dbFile, 0600, nil)
+		defer db.Close()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// add taskName to the database.
+		err = db.Update(func(tx *bolt.Tx) error {
+			// create bucket fot the label if it doesn't already exist
+			b, err := tx.CreateBucketIfNotExists([]byte(label))
+			// put this task in that bucket
+			err = b.Put([]byte(taskName), nil)
+			if err != nil {
+				return err
+			}
+			// if it's important, put it in the important bucket.
+			if imp {
+				b = tx.Bucket([]byte("imp"))
+				b.Put([]byte(taskName), []byte(label))
+			}
+			return err
+		})
 	},
 }
 
@@ -43,7 +65,8 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 
 	// Here you will define your flags and configuration settings.
-	addCmd.Flags().StringVarP(&label, "label", "l", "", "the label of the task to add")
+	addCmd.Flags().StringVarP(&label, "label", "l", "", "the label of the task to add (optional)")
+	addCmd.Flags().BoolVarP(&imp, "imp", "i", false, "Is this an important task? (optional)")
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// addCmd.PersistentFlags().String("foo", "", "A help for foo")

@@ -28,6 +28,7 @@ import (
 // declare Flags
 var cfgFile string
 var label string
+var imp bool
 
 const dbFile = "tasks.db"
 
@@ -65,7 +66,7 @@ func init() {
 	db, _ := bolt.Open(dbFile, 0600, nil)
 	defer db.Close()
 	db.Update(func(tx *bolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists([]byte("unlabeled"))
+		_, err := tx.CreateBucketIfNotExists([]byte(""))
 		if err != nil {
 			return fmt.Errorf("create bucket: %s", err)
 		}
