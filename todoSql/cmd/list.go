@@ -36,10 +36,9 @@ to quickly create a Cobra application.`,
 		db, err := gorm.Open("sqlite3", "tasks.db")
 		defer db.Close()
 		checkErr(err)
-		var tsk task
-		db.First(&tsk)
-		fmt.Println(tsk.Name)
-		fmt.Println(tsk.CompTime)
+		var tsks []task
+		db.Find(&tsks)
+		fmt.Println(tsks)
 	},
 }
 

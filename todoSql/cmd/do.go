@@ -22,6 +22,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var all bool
+
 // doCmd represents the do command
 var doCmd = &cobra.Command{
 	Use:   "do",
@@ -33,15 +35,24 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("do called")
 		taskName := strings.Join(args, " ")
 		db, err := gorm.Open("sqlite3", "tasks.db")
 		defer db.Close()
+
 		checkErr(err)
-		var tsk task
-		db.Where("name = ?", taskName).First(&tsk)
-		tsk.Complete()
-		db.Save(&tsk)
+
+		if all {
+			if taskName != "" {
+				db.Unscoped().Delete(&task{Name: taskName})
+				fmt.Println("deleted all records")
+			} else {
+				db.Unscoped().Delete(&task{})
+			}
+
+			return
+		}
+		db.Where("name = ?", taskName).Delete(&task{})
+		fmt.Println("soft delete")
 	},
 }
 
@@ -49,6 +60,7 @@ func init() {
 	rootCmd.AddCommand(doCmd)
 
 	// Here you will define your flags and configuration settings.
+	doCmd.Flags().BoolVarP(&all, "all", "a", false, "Use this Flag to do a hard reset of the db.")
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:

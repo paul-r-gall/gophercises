@@ -15,8 +15,8 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
-	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -39,13 +39,12 @@ to quickly create a Cobra application.`,
 		checkErr(err)
 		taskName := strings.Join(args, " ")
 		tsk := task{
-			Name:       taskName,
-			Label:      label,
-			Imp:        imp,
-			CreateTime: time.Now(),
+			Name:  taskName,
+			Label: label,
+			Imp:   imp,
 		}
+		fmt.Println(tsk)
 		db.Create(&tsk)
-
 	},
 }
 

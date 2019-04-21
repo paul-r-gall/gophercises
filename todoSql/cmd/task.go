@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"time"
-
 	"github.com/jinzhu/gorm"
 	// add driver
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
@@ -13,15 +11,9 @@ import (
 // not exported, only accessible from withing pkg cmd
 type task struct {
 	gorm.Model
-	Name       string `gorm:"unique"`
-	Imp        bool
-	Label      string
-	CompTime   time.Time
-	CreateTime time.Time
-}
-
-func (tsk *task) Complete() {
-	tsk.CompTime = time.Now()
+	Name  string `gorm:"unique"`
+	Imp   bool
+	Label string
 }
 
 func (tsk *task) Promote() {
