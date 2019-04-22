@@ -37,7 +37,13 @@ to quickly create a Cobra application.`,
 		defer db.Close()
 		checkErr(err)
 		var tsks []task
-		db.Find(&tsks)
+		if label == "" {
+			db.Find(&tsks)
+		} else {
+			db.Where("label = ?", label).Find(&tsks)
+			fmt.Println(label)
+		}
+
 		fmt.Println(tsks)
 	},
 }
@@ -46,6 +52,7 @@ func init() {
 	rootCmd.AddCommand(listCmd)
 
 	// Here you will define your flags and configuration settings.
+	listCmd.Flags().StringVarP(&label, "label", "l", "", "List only tasks with this label")
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
