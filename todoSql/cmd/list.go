@@ -32,19 +32,34 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("list called")
+		fmt.Println("TASK LIST")
 		db, err := gorm.Open("sqlite3", "tasks.db")
 		defer db.Close()
 		checkErr(err)
+
 		var tsks []task
-		if label == "" {
-			db.Find(&tsks)
-		} else {
-			db.Where("label = ?", label).Find(&tsks)
-			fmt.Println(label)
+
+		if label != "" {
+			db = db.Where("label = ?", label)
+		}
+		if imp {
+			db = db.Where("imp = ?", true)
 		}
 
-		fmt.Println(tsks)
+		// store tasks into tsks
+		db.Order("label, imp desc").Find(&tsks)
+		pLabel := ""
+		for _, tsk := range tsks {
+			if tsk.Label != pLabel {
+				pLabel = tsk.Label
+				fmt.Println(pLabel + " tasks")
+			}
+			s := tsk.Name
+			if tsk.Imp {
+				s = "**" + s + "**"
+			}
+			fmt.Println(" - " + s)
+		}
 	},
 }
 
@@ -53,6 +68,7 @@ func init() {
 
 	// Here you will define your flags and configuration settings.
 	listCmd.Flags().StringVarP(&label, "label", "l", "", "List only tasks with this label")
+	listCmd.Flags().BoolVarP(&imp, "imp", "i", false, "List only the important items")
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:

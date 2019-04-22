@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/jinzhu/gorm"
+	// import sqlite driver
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/spf13/cobra"
 )
