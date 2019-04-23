@@ -15,7 +15,6 @@
 package cmd
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/jinzhu/gorm"
@@ -42,17 +41,10 @@ to quickly create a Cobra application.`,
 		checkErr(err)
 
 		if all {
-			if taskName != "" {
-				db.Unscoped().Delete(&task{Name: taskName})
-				fmt.Println("deleted all records")
-			} else {
-				db.Unscoped().Delete(&task{})
-			}
-
+			db.Unscoped().Delete(&task{})
 			return
 		}
-		db.Where("name = ?", taskName).Delete(&task{})
-		fmt.Println("soft delete")
+		db.Unscoped().Where("name = ?", taskName).Delete(&task{})
 	},
 }
 
