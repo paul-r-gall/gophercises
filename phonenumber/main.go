@@ -9,8 +9,12 @@ import (
 
 	"strconv"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+const DB_SIZE = 20
+const DB_FILE = "pNums.db"
 
 func intToStr(nums []int) string {
 	s := ""
@@ -20,13 +24,24 @@ func intToStr(nums []int) string {
 	return s
 }
 
-func randPhn() string {
+func cleanPNum(s string) string {
+	newS := ""
+	mm := map[string]bool{" ": true, "(": true, ")": true, "-": true}
+	for _, r := range s {
+		c := string(r)
+		if !mm[c] {
+			newS += string(c)
+		}
+	}
+	return newS
+}
+
+func randPNum() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	var num [10]int
 	for i := range num {
 		num[i] = r.Intn(10)
 	}
-	fmt.Println(num)
 
 	parens := r.Intn(2) == 1
 	dash := r.Intn(2) == 1
@@ -46,6 +61,38 @@ func randPhn() string {
 	return s
 }
 
+type pNum struct {
+	gorm.Model
+	Num string `gorm:"not null;unique"`
+}
+
 func main() {
-	fmt.Println(randPhn())
+	db, err := gorm.Open("sqlite3", DB_FILE)
+	if err != nil {
+		return
+	}
+
+	if !db.HasTable(&pNum{}) {
+		fmt.Println("making tbl")
+		db.AutoMigrate(&pNum{})
+		fmt.Println("automigration completed")
+		for i := 0; i < DB_SIZE; i++ {
+			rNum := randPNum()
+			//fmt.Println(rNum)
+			db.Create(&pNum{Num: rNum})
+		}
+		fmt.Println("filling completed")
+	}
+	defer db.Close()
+
+	pNums := []pNum{}
+	db.Find(&pNums)
+
+	//fmt.Println(pNums)
+
+	for _, sNum := range pNums {
+		fmt.Println(sNum.ID)
+		fmt.Println(cleanPNum(sNum.Num))
+		db.Model(&sNum).Update("num", cleanPNum(sNum.Num))
+	}
 }
