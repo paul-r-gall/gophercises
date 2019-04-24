@@ -17,6 +17,10 @@ const (
 	SPADES
 )
 
+func (s Suit) String() string {
+	return [...]string{"NONE", "CLUBS", "DIAMONDS", "HEARTS", "SPADES"}[s]
+}
+
 // Card -- Suit ranges from Clubs to Spades, Val from 1-13 (1 being Ace, 13 being King)
 // A Suit of NONE implies the card is a Joker. The Val of a Joker should be zero.
 // These internal variables are not changeable from outside the package.
