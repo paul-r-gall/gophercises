@@ -31,9 +31,39 @@ func (d *Deck) Sort() {
 	})
 }
 
-// TopCard returns the current top card of the deck (0-index of the internal array)
-func (d Deck) TopCard() Card {
+// Peek returns the current top card of the deck (0-index of the internal array)
+func (d Deck) Peek() Card {
 	return d.cards[0]
+}
+
+// Draw is the same as Peek, but also removes the top card of the deck
+func (d Deck) Draw() Card {
+	c := d.cards[0]
+	d.cards = d.cards[1:]
+	return c
+}
+
+// Here are some example functional options you can add.
+
+// AddJokers returns a function which appends n Jokers to the end of the cards.
+func AddJokers(n int) func(*[]Card) {
+	return func(cs *[]Card) {
+		for i := 0; i < n; i++ {
+			*cs = append(*cs, Card{val: 0, suit: NONE})
+		}
+	}
+}
+
+// DeleteCards deletes the specific cards listed from the standard deck.
+func DeleteCards(delCards map[Card]bool) func(*[]Card) {
+	return func(cs *[]Card) {
+		for i := 0; i < len(*cs); i++ {
+			if delCards[(*cs)[i]] {
+				*cs = append((*cs)[:i], (*cs)[i+1:]...)
+				i--
+			}
+		}
+	}
 }
 
 func defCards() []Card {
@@ -48,8 +78,12 @@ func defCards() []Card {
 
 // NewDeck generates a new deck of cards using a user defined
 // ordering and functional options for which cards to include.
-// By default, if run as NewDeck(nil), it will use the standard
-// ordering of 2 low, Ace high, and Clubs<Diamonds<Hearts<Spades
+// These functional options are run in order, so be aware of that
+// when using. The first option called will be run on the base
+// 52-card deck
+//
+// By default, if run as NewDeck(nil), it will use the standard bridge
+// ordering of Ace low, King high, and Clubs < Diamonds < Hearts < Spades
 func NewDeck(less func(Card, Card) bool, opts ...func(*[]Card)) Deck {
 	nd := Deck{}
 

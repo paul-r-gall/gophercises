@@ -24,9 +24,14 @@ func (s Suit) String() string {
 // Card -- Suit ranges from Clubs to Spades, Val from 1-13 (1 being Ace, 13 being King)
 // A Suit of NONE implies the card is a Joker. The Val of a Joker should be zero.
 // These internal variables are not changeable from outside the package.
+// I might need to make a setter and getter for these, as well as a lock option.
 type Card struct {
 	suit Suit
 	val  int
+}
+
+func MakeCard(val int, suit Suit) Card {
+	return Card{suit: suit, val: val}
 }
 
 // Suit returns the suit of the card as a Suit
@@ -38,11 +43,8 @@ func defLess(c1 Card, c2 Card) bool {
 	if c1.suit < c2.suit {
 		return true
 	}
-	if c1.val == 1 {
+	if c1.suit > c2.suit {
 		return false
-	}
-	if c2.val == 1 {
-		return true
 	}
 	if c2.val > c1.val {
 		return true
@@ -56,7 +58,7 @@ func (c Card) Denom() int {
 }
 
 // Name gives the name of the card as a string.
-func (c Card) Name() string {
+func (c Card) String() string {
 	if c.suit == NONE {
 		return "Joker"
 	}
