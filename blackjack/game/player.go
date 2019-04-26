@@ -16,23 +16,35 @@ type Player struct {
 	Money    int
 	Cards    []deck.Card
 	BetAmt   int
+	
 	// Idea: these two should be customized based on the
 	// hosting of the game.
 	responseMethod func() Response
 	betMethod      func() int
+
+	// Channels for input and output. Again, we are aiming
+	// to expand to a webhosted game.
+	RespInChan  <-chan Response
+	RespOutChan chan<- Response
+
+	BetInChan  <-chan int
+	BetOutChan chan<- int
+
+	GenOutChan chan<- string
 }
 
 func NewPlayer(isDealer bool, cmd bool) *Player {
 	p := Player{}
 	if isDealer {
+		p.IsDealer = isDealer
 		p.responseMethod = func() Response {
 			pts := p.Points()
-			// counting A=11: must Stand if between 17-21, must Hit otherwise.
-			if pts[1] > 16 && pts[1] < 22 {
-				return Stand
-			}
+			// Start by counting A=11: must Hit if lower than 17, must stand otherwise
 			if pts[1] < 17 {
 				return Hit
+			}
+			if pts[1] < 22 {
+				return Stand
 			}
 			// Counting A=1: must Hit if less than 17, must stand otherwise
 			if pts[0] < 17 {
@@ -41,7 +53,20 @@ func NewPlayer(isDealer bool, cmd bool) *Player {
 			return Stand
 		}
 		p.betMethod = nil
+
+	} else if cmd {
+		p.Money = 500
+		p.IsDealer = isDealer
+		p.responseMethod = func() Response {
+			stand := false
+			for !stand && !p.IsBust() {
+
+			}
+
+		}
+
 	}
+
 	return &p
 }
 
