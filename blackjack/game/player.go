@@ -1,6 +1,8 @@
 package game
 
 import (
+	"fmt"
+
 	deck "github.com/paul-r-gall/gophercises/deck"
 )
 
@@ -16,11 +18,11 @@ type Player struct {
 	Money    int
 	Cards    []deck.Card
 	BetAmt   int
-	
+
 	// Idea: these two should be customized based on the
 	// hosting of the game.
 	responseMethod func() Response
-	betMethod      func() int
+	betMethod      func()
 
 	// Channels for input and output. Again, we are aiming
 	// to expand to a webhosted game.
@@ -58,13 +60,44 @@ func NewPlayer(isDealer bool, cmd bool) *Player {
 		p.Money = 500
 		p.IsDealer = isDealer
 		p.responseMethod = func() Response {
-			stand := false
-			for !stand && !p.IsBust() {
-
+			for {
+				fmt.Println(p.CardsString())
+				fmt.Println("Type H for Hit, S for stand.")
+				var input string
+				fmt.Scanln(&input)
+				switch input {
+				case "H":
+					return Hit
+				case "S":
+					return Stand
+				default:
+					fmt.Println("Invalid entry")
+				}
 			}
-
+		}
+		p.betMethod = func() {
+			for {
+				fmt.Println("You have $" + string(p.Money))
+				fmt.Println("Enter your bet.")
+				var bet int
+				_, err := fmt.Scan(&bet)
+				if err != nil {
+					fmt.Println("Bet must be a number")
+				}
+				if bet < p.Money+1 && 0 < bet {
+					fmt.Println("Bet Accepted.")
+					p.BetAmt = bet
+					return
+				}
+				fmt.Println("Invalid Bet")
+			}
 		}
 
+		return &p
+
+	} else {
+		fmt.Println("NOT IMPLEMENTED")
+		panic("")
 	}
 
 	return &p
@@ -72,6 +105,18 @@ func NewPlayer(isDealer bool, cmd bool) *Player {
 
 func NewPlayerCmd(isDealer bool) *Player {
 	return NewPlayer(isDealer, true)
+}
+
+func (p Player) CardsString() string {
+	s := ""
+	for i, c := range p.Cards {
+		if i != 0 {
+			s += ","
+		}
+		s += " "
+		s += c.String()
+	}
+	return s
 }
 
 // Points returns an ordered pair. The first number
@@ -112,6 +157,6 @@ func (p Player) GetResponse() Response {
 	return p.responseMethod()
 }
 
-func (p Player) GetBet() int {
-	return p.betMethod()
+func (p Player) GetBet() {
+	p.betMethod()
 }
