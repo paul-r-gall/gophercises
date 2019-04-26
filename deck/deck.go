@@ -8,8 +8,9 @@ import (
 
 // Deck is the user-safe exported deck
 type Deck struct {
-	cards []Card
-	less  func(Card, Card) bool
+	cards   []Card
+	less    func(Card, Card) bool
+	ogCards []Card
 }
 
 //Shuffle does a random shuffle of the Deck.
@@ -36,8 +37,13 @@ func (d Deck) Peek() Card {
 	return d.cards[0]
 }
 
+//Resets the deck to its original status -- replacing all drawn cards.
+func (d *Deck) Reset() {
+	d.cards = d.ogCards
+}
+
 // Draw is the same as Peek, but also removes the top card of the deck
-func (d Deck) Draw() Card {
+func (d *Deck) Draw() Card {
 	c := d.cards[0]
 	d.cards = d.cards[1:]
 	return c
@@ -62,6 +68,16 @@ func DeleteCards(delCards map[Card]bool) func(*[]Card) {
 				*cs = append((*cs)[:i], (*cs)[i+1:]...)
 				i--
 			}
+		}
+	}
+}
+
+// MultDecks multiplies your deck by the provided number.
+func MultDecks(numDecks int) func(*[]Card) {
+	return func(cs *[]Card) {
+		base := *cs
+		for i := 1; i < numDecks; i++ {
+			*cs = append(*cs, base...)
 		}
 	}
 }
@@ -92,9 +108,10 @@ func NewDeck(less func(Card, Card) bool, opts ...func(*[]Card)) Deck {
 	} else {
 		nd.less = less
 	}
-	nd.cards = defCards()
+	nd.ogCards = defCards()
 	for _, fn := range opts {
-		fn(&nd.cards)
+		fn(&nd.ogCards)
 	}
+	nd.cards = nd.ogCards
 	return nd
 }

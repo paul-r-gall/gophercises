@@ -24,12 +24,13 @@ func (s Suit) String() string {
 // Card -- Suit ranges from Clubs to Spades, Val from 1-13 (1 being Ace, 13 being King)
 // A Suit of NONE implies the card is a Joker. The Val of a Joker should be zero.
 // These internal variables are not changeable from outside the package.
-// I might need to make a setter and getter for these, as well as a lock option.
 type Card struct {
 	suit Suit
 	val  int
 }
 
+// MakeCard returns a card with the given suit and denomination.
+// These values cannot be edited once set, but can be accessed.
 func MakeCard(val int, suit Suit) Card {
 	return Card{suit: suit, val: val}
 }
