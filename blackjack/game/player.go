@@ -9,7 +9,8 @@ import (
 type Response int
 
 const (
-	Hit Response = iota
+	None Response = iota
+	Hit
 	Stand
 )
 
@@ -77,16 +78,17 @@ func NewPlayer(isDealer bool, cmd bool) *Player {
 		}
 		p.betMethod = func() {
 			for {
-				fmt.Println("You have $" + string(p.Money))
+				fmt.Printf("You have $%d.\n", p.Money)
 				fmt.Println("Enter your bet.")
 				var bet int
-				_, err := fmt.Scan(&bet)
+				_, err := fmt.Scanln(&bet)
 				if err != nil {
 					fmt.Println("Bet must be a number")
 				}
 				if bet < p.Money+1 && 0 < bet {
 					fmt.Println("Bet Accepted.")
 					p.BetAmt = bet
+					p.Money -= bet
 					return
 				}
 				fmt.Println("Invalid Bet")
@@ -105,6 +107,10 @@ func NewPlayer(isDealer bool, cmd bool) *Player {
 
 func NewPlayerCmd(isDealer bool) *Player {
 	return NewPlayer(isDealer, true)
+}
+
+func (p Player) Has21() bool {
+	return p.Points()[0] == 21 || p.Points()[1] == 21
 }
 
 func (p Player) CardsString() string {
@@ -139,6 +145,14 @@ func (p Player) Points() [2]int {
 		}
 	}
 	return [2]int{s1, s2}
+}
+
+func (p Player) BestPoints() int {
+	s := p.Points()
+	if s[1] > 21 {
+		return s[0]
+	}
+	return s[1]
 }
 
 // IsBust returns whether the player has gone bust.
